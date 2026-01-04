@@ -1,2 +1,4 @@
 # flappy-bird
-prosjekt for etterligning av spillet flappy-bird, python
+Dette prosjektet bygger et spill som skal etterligne spillet Flappy Bird.
+
+Prosjektet er skrevet i Python, med Pygame-biblioteket, og er påbegynt våren 2025
