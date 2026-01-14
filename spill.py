@@ -7,10 +7,10 @@ pg.init()
 HEIGHT = 700
 WIDTH = 600
 
-bakgrunn = pg.image.load("flappy/bakgrunn.png")
+bakgrunn = pg.image.load("bakgrunn.png")
 bakgrunn = pg.transform.scale(bakgrunn, (WIDTH, HEIGHT))
 
-fugl = pg.image.load("flappy/bird.png")
+fugl = pg.image.load("bird.png")
 
 clock = pg.time.Clock()
 
@@ -136,7 +136,6 @@ class Bird:
         elif self.dy == 0:
             self.vinkel = 0
 
-        print(self.dy)
         self.rotert = pg.transform.rotate(self.fugl,self.vinkel)
         self.ny_fugl = self.rotert.get_rect(center=(self.x, self.y))
 
@@ -164,8 +163,22 @@ class Hindring:
             self.x -= 2
 
     def render(self,vindu):
-        pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x,0,self.width,self.y)) #første halvdel av hindringen
-        pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x,self.y+self.diff,self.width,HEIGHT)) #andre halvdel
+        #øvre halvdel
+        pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x,0,self.width,self.y)) #hovedtegning
+        pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x,0,self.width,self.y),1) #kantlinje 
+
+        #kant
+        pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x - 5,self.y - (HEIGHT // 20),self.width + 10,HEIGHT // 20)) #hovedtegning
+        pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x - 5,self.y - (HEIGHT // 20),self.width + 10,HEIGHT // 20),1) #kantlinje
+
+
+        #nedre halvdel 
+        pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x,self.y+self.diff,self.width,HEIGHT)) 
+        pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x,self.y+self.diff,self.width,HEIGHT),1) 
+        
+        #kant
+        pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x-5,self.y + self.diff,self.width+ 10,HEIGHT // 20)) #hovedtegning
+        pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x-5,self.y + self.diff,self.width+ 10,HEIGHT // 20),1) #kantlinje
 
 a = App()
 a.run()
