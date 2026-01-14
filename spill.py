@@ -15,17 +15,20 @@ fugl = pg.image.load("bird.png")
 clock = pg.time.Clock()
 
 class App:
-    def __init__(self,height = HEIGHT, width = WIDTH, score = 0):
-        self.height = height
-        self.width = width
-        self.score = score
+    def __init__(self):
+        self.height = HEIGHT
+        self.width = WIDTH
+        self.score = 0
+        self._high_score = 0
     
     def setup(self):
         self.vindu = pg.display.set_mode((self.width,self.height))
-        self.bird = Bird(self.width//2,self.height//2,0)
+        self.bird = Bird(self.width//2,self.height//2)
 
         self.hindring1 = Hindring(WIDTH)
         self.hindring2 = Hindring(WIDTH*1.5)
+        pg.display.set_caption('Flakse-Fugl')
+
 
     def render(self):
         self.vindu.fill((255,255,255))
@@ -40,17 +43,25 @@ class App:
             font = pg.font.SysFont(None,17)
             text = font.render(f'Trykk på mellomrom / SPACE', True, (0, 0, 0))        
             self.vindu.blit(text, (self.width // 2 -75 , self.height // 2+50))
+        
+        font_score = pg.font.SysFont(None,30)
+        hs_text = font_score.render(f'Highscore: {self._high_score}', True, (0,0,0))
+        score_text = font_score.render(f'Nåværende score: {self.score}', True, (0,0,0))
+        self.vindu.blit(hs_text,(self.width // 11 , self.height // 10))
+        self.vindu.blit(score_text,(self.width // 11 , (self.height // 10)+35))
 
-        pg.display.set_caption(str(self.score))
+
+        
         pg.display.flip()
     
     def run(self):
         self.setup()
         self.running = True
 
+        
         while self.running:
-
-            self.bird.gravitasjon()
+            self.render()
+            
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -60,59 +71,71 @@ class App:
                     if event.key == pg.K_SPACE:
                         self.bird.beveg()
 
-            self.render()
+            
 
             # Score skal ikke påvirkes før spillet er i gang, og G ikke er lik 0
-            if self.bird.G != 0: 
+            if self.bird.G != 0:
+                self.bird.gravitasjon()
                 self.hindring1.beveg()
                 self.hindring2.beveg()
 
                 #beveger blokkene først, slik at logikken nedenfor skal fungere som ønsket selv for den første blokken, som jo begynner med x = bredde
 
+                #poengsum oppdateres i det en av hindringene går utenfor skjermen på venstre side. Da er fuglen akkurat kommet gjennom den 'andre' hindringen, slik at poenglogikken fungerer som ønsket. 
                 if self.hindring2.x == WIDTH:
-                    self.score +=1
+                    self.score += 1
                 elif self.hindring1.x == WIDTH:
-                    self.score +=1
+                    self.score += 1
 
             #kollisjonssjekk
             #hindring 1
-            if self.bird.x in range(int(self.hindring1.x-self.bird.r) , int(self.hindring1.x+self.hindring1.width+self.bird.r)): #dersom fuglen, med noe ekstra margin, er ved en hindring (x)
-                if self.bird.y+self.bird.r >= self.hindring1.y+self.hindring1.diff: #dersom fuglens y (pluss radius) er "større" enn det hindringens y er, altså kollisjon på nedre del
-                    self.running = False
-                    break
+                if self.bird.x in range(int(self.hindring1.x-self.bird.r) , int(self.hindring1.x+self.hindring1.width+self.bird.r)): #dersom fuglen, med noe ekstra margin, er ved en hindring i x-retning
+                    if self.bird.y+self.bird.r >= self.hindring1.y+self.hindring1.diff: 
+                        #dersom fuglens y (pluss radius) er "større" enn det hindringens y er. (nedre del)
+                        #Dette dekker både kollisjon når fuglen er i mellom hindringene, og dersom man kolliderer utenfor hindringene
+                        self.dod()
 
-                elif self.bird.y-self.bird.r <= self.hindring1.y:   #derson fuglens y, minus radius, (fuglens ytre kant) er "mindre" enn (fuglen er høyere opp enn) hindringens topp
-                    self.running = False                            #dette vil dermed også fungere for kollisjoner med sideveggene
-                    break
+                    elif self.bird.y-self.bird.r <= self.hindring1.y:   
+                        #derson fuglens y, minus radius, (fuglens ytre kant) er "mindre" enn hindringens y, har den med øvre del av hindringen
+                        self.dod()
 
             #hindring 2, samme logikk som over
-            if self.bird.x in range(int(self.hindring2.x-self.bird.r) , int(self.hindring2.x+self.hindring2.width+self.bird.r)):
-                if self.bird.y+self.bird.r >= self.hindring2.y+self.hindring2.diff:
-                    self.running = False
-                    break
+                if self.bird.x in range(int(self.hindring2.x-self.bird.r) , int(self.hindring2.x+self.hindring2.width+self.bird.r)):
+                    if self.bird.y+self.bird.r >= self.hindring2.y+self.hindring2.diff:
+                        self.dod()
 
-                elif self.bird.y-self.bird.r <= self.hindring2.y:
-                    self.running = False
-                    break
+                    elif self.bird.y-self.bird.r <= self.hindring2.y:
+                        self.dod()
 
-            if self.bird.y + self.bird.dy > self.height:
-                self.running = False
-                break
+                if self.bird.y + self.bird.dy > self.height: #dersom fuglen faller ned på bunnen av skjermen er spillet også over
+                    self.dod()
+
             clock.tick(60)
+    
+    def dod(self):
+        if self.score > self._high_score:
+            self._high_score = self.score
+        
+        self.score = 0
+        self.bird.reset()
+        self.hindring1.sett_x(self.width)
+        self.hindring2.sett_x(self.width * 1.5) #resetter fugl og hindringer til slik de var etter setup() metoden
 
 class Bird:
-    def __init__(self,x,y,dy,r = 15):
-        self.x = x
+    def __init__(self,x,y):
         self.y = y
-        self.dy = dy
+        self.dy = 0
         self.G = 0
-        self.r = r
+        self.r = 15
+        self._start_y = y
+        self.x = x
 
 
     def beveg(self):
-        self.G = 0.35
+        self.G = 0.35 #oppdateres kun når spillet først startes, holdes ellers konstant
         self.dy = 0
         self.dy -= 7 
+        
 
     def gravitasjon(self):
         self.dy += self.G
@@ -140,6 +163,11 @@ class Bird:
         self.ny_fugl = self.rotert.get_rect(center=(self.x, self.y))
 
         vindu.blit(self.rotert, self.ny_fugl.topleft) #.topleft fordi øverst til venstre er "sentrum" av fuglen. 
+    
+    def reset(self):
+        self.G = 0
+        self.dy = 0
+        self.y = self._start_y
 
 class Hindring:
     def __init__(self,x):
@@ -149,10 +177,9 @@ class Hindring:
         self.width = WIDTH // 8
 
     def nyRunde(self):
-        """
-        metode som resetter x-posisjon
-        kalles når den aktuelle hindringen er på venstre side av skjermen
-        """
+        #resetter x-posisjon til å være på høyre ende av skjermen. Kalles for aktuelt hindring-objekt når det er utenfor på venstre side
+        #bruker randint for å ha ulik høyde der åpningen er for hver runde
+
         self.x = WIDTH
         self.y = r.randint(HEIGHT // 3, HEIGHT-HEIGHT//3)
   
@@ -161,12 +188,14 @@ class Hindring:
             self.nyRunde()
         else:
             self.x -= 2
+    
+    def sett_x(self,parameter):
+        self.x = parameter
 
     def render(self,vindu):
         #øvre halvdel
         pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x,0,self.width,self.y)) #hovedtegning
         pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x,0,self.width,self.y),1) #kantlinje 
-
         #kant
         pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x - 5,self.y - (HEIGHT // 20),self.width + 10,HEIGHT // 20)) #hovedtegning
         pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x - 5,self.y - (HEIGHT // 20),self.width + 10,HEIGHT // 20),1) #kantlinje
@@ -175,15 +204,9 @@ class Hindring:
         #nedre halvdel 
         pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x,self.y+self.diff,self.width,HEIGHT)) 
         pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x,self.y+self.diff,self.width,HEIGHT),1) 
-        
         #kant
         pg.draw.rect(vindu,(0,255,0),pg.Rect(self.x-5,self.y + self.diff,self.width+ 10,HEIGHT // 20)) #hovedtegning
         pg.draw.rect(vindu,(0,0,0),pg.Rect(self.x-5,self.y + self.diff,self.width+ 10,HEIGHT // 20),1) #kantlinje
 
 a = App()
 a.run()
-
-
-
-
-
