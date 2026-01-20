@@ -3,7 +3,9 @@
 
 Dette prosjektet bygger et spill som skal etterligne spillet Flappy Bird.
 
-Prosjektets formål var det å leke seg med, og å bli komfortabel med bruk av pygame, samtidig som det ga god øving på objektorientert programmering. 
+Prosjektets formål var det å leke seg med, og å bli komfortabel med bruk av pygame, samtidig som det ga god øving på objektorientert programmering.
+
+Bildet av fuglen er lånt fra internett, og bakgrunnen er KI-generert.
 
 Prosjektet er skrevet i Python, med Pygame-biblioteket, og er påbegynt våren 2025.
 
