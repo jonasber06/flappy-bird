@@ -29,7 +29,6 @@ class App:
         self.hindring2 = Hindring(WIDTH*1.5)
         pg.display.set_caption('Flakse-Fugl')
 
-
     def render(self):
         self.vindu.fill((255,255,255))
         self.vindu.blit(bakgrunn,(0,0))
@@ -43,28 +42,20 @@ class App:
             font = pg.font.SysFont(None,17)
             text = font.render(f'Trykk på mellomrom / SPACE', True, (0, 0, 0))        
             self.vindu.blit(text, (self.width // 2 -75 , self.height // 2+50))
-        
-        
-        
+            
         font_score = pg.font.SysFont(None,30)
         hs_text = font_score.render(f'Highscore: {self._high_score}', True, (0,0,0))
         score_text = font_score.render(f'Nåværende score: {self._score}', True, (0,0,0))
         self.vindu.blit(hs_text,(self.width // 11 , self.height // 10))
         self.vindu.blit(score_text,(self.width // 11 , (self.height // 10)+35))
-
-
-        
         pg.display.flip()
     
     def run(self):
         self.setup()
         self.running = True
-
-        
         while self.running:
             self.render()
             
-
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
@@ -106,10 +97,10 @@ class App:
                 if self.bird.hent_y() + self.bird.hent_dy() > self.height: #dersom fuglen faller ned på bunnen av skjermen er spillet også over
                     self.dod()
                 
-                if self.bird.hent_y() + self.bird.hent_dy() < 0: #dersom fuglen flyr over 
+                if self.bird.hent_y() + self.bird.hent_dy() < 0: #dersom fuglen flyr for høyt
                     self.bird.sett_dy(0)
 
-            clock.tick(60)
+            clock.tick(60) #60 fps
     
     def dod(self):
         if self._score > self._high_score:
@@ -124,7 +115,6 @@ class App:
         self.hindring1.sett_x(self.width)
         self.hindring2.sett_x(self.width * 1.5) #resetter fugl og hindringer til slik de var etter setup() metoden
 
-
 class Bird:
     def __init__(self,x,y):
         self.y = y
@@ -135,7 +125,6 @@ class Bird:
         self.x = x
         self.fugl = pg.transform.scale(fugl,(6*self.r,6*self.r))
         self.rect = pg.Rect(0,0,2*self.r,2*self.r)
-
 
     def beveg(self):
         self.G = 0.35 #oppdateres kun når spillet først startes, holdes ellers konstant
@@ -230,7 +219,6 @@ class Hindring:
         for rect in rects: #tegner basert på de oppdaterte rect-objektene
             pg.draw.rect(vindu,(0,255,0),rect) #grønn del
             pg.draw.rect(vindu,(0,0,0),rect,1) #kantlinje
-
 
 a = App()
 a.run()
