@@ -104,7 +104,6 @@ class App:
                 if (
                     self.bird.hent_y() + self.bird.hent_dy() < 0
                 ):  # dersom fuglen flyr over
-                    #self.bird.sett_dy(0.5)
                     self.bird.sett_y(0)
 
             clock.tick(60)
@@ -180,9 +179,6 @@ class Bird:
 
     def hent_dy(self):
         return self.dy
-
-    def sett_dy(self, parameter):
-        self.dy = parameter
 
     def sett_y(self, parameter):
         self.y = parameter
