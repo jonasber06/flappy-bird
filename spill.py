@@ -1,5 +1,4 @@
 import pygame as pg
-import math as m
 import random as r
 
 pg.init()
@@ -41,7 +40,7 @@ class App:
 
         if self.bird.G == 0:  # før spillet er i gang, fuglen har 0 i G
             font = pg.font.SysFont(None, 17)
-            text = font.render(f"Trykk på mellomrom / SPACE", True, (0, 0, 0))
+            text = font.render("Trykk på mellomrom / SPACE", True, (0, 0, 0))
             self.vindu.blit(text, (self.width // 2 - 75, self.height // 2 + 50))
 
         font_score = pg.font.SysFont(None, 30)
@@ -89,9 +88,7 @@ class App:
 
                 # hindring 1
                 for rect_objekt in self.hindring1.hent_rect():
-                    if fugl_rect.colliderect(
-                        rect_objekt
-                    ):  # .colliderect() gir en boolsk verdi som gir true dersom fugl_rect og rect_objekt kolliderer
+                    if fugl_rect.colliderect(rect_objekt):  # .colliderect() gir en boolsk verdi som gir true dersom fugl_rect og rect_objekt kolliderer
                         self.dod()
 
                 # hindring2
@@ -107,7 +104,8 @@ class App:
                 if (
                     self.bird.hent_y() + self.bird.hent_dy() < 0
                 ):  # dersom fuglen flyr over
-                    self.bird.sett_dy(0)
+                    #self.bird.sett_dy(0.5)
+                    self.bird.sett_y(0)
 
             clock.tick(60)
 
@@ -122,9 +120,7 @@ class App:
         self.hindring2.nyRunde()  # for å få nye høyder på hindringen til den nye runden. denne metoden flytter og x, men det tas hånd om i linjene under
 
         self.hindring1.sett_x(self.width)
-        self.hindring2.sett_x(
-            self.width * 1.5
-        )  # resetter fugl og hindringer til slik de var etter setup() metoden
+        self.hindring2.sett_x(self.width * 1.5)  # resetter fugl og hindringer til slik de var etter setup() metoden
 
 
 class Bird:
@@ -139,9 +135,7 @@ class Bird:
         self.rect = pg.Rect(0, 0, 2 * self.r, 2 * self.r)
 
     def beveg(self):
-        self.G = (
-            0.35  # oppdateres kun når spillet først startes, holdes ellers konstant
-        )
+        self.G = 0.35  # oppdateres kun når spillet først startes, holdes ellers konstant
         self.dy = 0
         self.dy -= 7
 
@@ -172,9 +166,7 @@ class Bird:
         # pg.draw.rect(vindu,(0,0,0),self.hent_rect(),1) #denne linjen kan kommenteres inn/ut for å vise fuglens 'hitbox'
 
     def hent_rect(self):
-        rect = pg.Rect(
-            self.x, self.y - self.r, 2 * self.r, 2 * self.r
-        )  # dette rect-objektet fungerer som en slags hitbox for fuglen
+        rect = pg.Rect(self.x, self.y - self.r, 2 * self.r, 2 * self.r)  # dette rect-objektet fungerer som en slags hitbox for fuglen
         rect.centerx = WIDTH // 2
         return rect
 
@@ -191,6 +183,9 @@ class Bird:
 
     def sett_dy(self, parameter):
         self.dy = parameter
+
+    def sett_y(self, parameter):
+        self.y = parameter
 
 
 class Hindring:
@@ -220,9 +215,7 @@ class Hindring:
         return [
             pg.Rect(self.x, 0, self.width, self.y),
             pg.Rect(self.x - 5, self.y - (HEIGHT // 20), self.width + 10, HEIGHT // 20),
-            pg.Rect(
-                self.x, self.y + self.diff, self.width, HEIGHT - (self.y + self.diff)
-            ),
+            pg.Rect(self.x, self.y + self.diff, self.width, HEIGHT - (self.y + self.diff)),
             pg.Rect(self.x - 5, self.y + self.diff, self.width + 10, HEIGHT // 20),
         ]
         # henter rect-objekter for hindringen
